@@ -1,0 +1,23 @@
+{
+    "name": "net.indigames.unitywebsocket",
+    "version": "0.0.1",
+    "displayName": "Unity WebSocket Protocol",
+    "description": "C# Protocol for WebSocket using with Unity - abstracting from Native WebSockets by Endel Dreyer",
+    "unity": "2021.3",
+    "unityRelease": "6f1",
+    "documentationUrl": "https://example.com/",
+    "changelogUrl": "https://example.com/changelog.html",
+    "licensesUrl": "https://example.com/licensing.html",
+    "keywords": [
+        "websocket",
+        "websockets",
+        "native websocket",
+        "native websockets"
+    ],
+    "dependencies": {},
+    "author": {
+        "name": "Trung Nguyen",
+        "email": "trung.nguyen@indigames.net",
+        "url": "https://www.unity3d.com"
+    }
+}
