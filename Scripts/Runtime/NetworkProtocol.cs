@@ -7,7 +7,7 @@ namespace IndiGames.Network
 
     public class NetworkProtocol : INetworkProtocol
     {
-        public Dictionary<string, EventHandler<string>> _listenerMap = new();
+        public Dictionary<string, EventHandler<string>> _listenerMap = new Dictionary<string, EventHandler<string>>();
 
         public virtual Task Close()
         {
