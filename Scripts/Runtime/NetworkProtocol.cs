@@ -4,19 +4,10 @@ using System.Threading.Tasks;
 
 namespace IndiGames.Network
 {
-    public interface INetworkProtocol
-    {
-        public void RegisterEvent(string eventName, EventHandler<EventArgs> listener);
-        public void UnregisterEventListener(string eventName, EventHandler<EventArgs> listener);
-        public Task Emit(string eventName, EventArgs data);
-        public Task Connect();
-        public Task Close();
-        public void DispatchMessageQueue();
-    }
 
     public class NetworkProtocol : INetworkProtocol
     {
-        public Dictionary<string, EventHandler<EventArgs>> _listenerMap = new();
+        public Dictionary<string, EventHandler<string>> _listenerMap = new();
 
         public virtual Task Close()
         {
@@ -38,9 +29,19 @@ namespace IndiGames.Network
             throw new NotImplementedException();
         }
 
-        public void RegisterEvent(string eventName, EventHandler<EventArgs> listener)
+        public virtual Task Emit(string jsonString)
         {
-            if (!this._listenerMap.TryGetValue(eventName, out EventHandler<EventArgs> eventListener))
+            throw new NotImplementedException();
+        }
+
+        public virtual Task Emit(byte[] bytes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterEvent(string eventName, EventHandler<string> listener)
+        {
+            if (!this._listenerMap.TryGetValue(eventName, out EventHandler<string> eventListener))
             {
                 this._listenerMap.Add(eventName, eventListener);
             }
@@ -48,9 +49,9 @@ namespace IndiGames.Network
         }
 
 
-        public void UnregisterEventListener(string eventName, EventHandler<EventArgs> listener)
+        public void UnregisterEventListener(string eventName, EventHandler<string> listener)
         {
-            if (this._listenerMap.TryGetValue(eventName, out EventHandler<EventArgs> eventListener))
+            if (this._listenerMap.TryGetValue(eventName, out EventHandler<string> eventListener))
             {
                 eventListener -= listener;
                 this._listenerMap[eventName] = eventListener;
