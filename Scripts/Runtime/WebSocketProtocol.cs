@@ -55,10 +55,10 @@ namespace IndiGames.Network
 #endif
         }
 
-        public override Task Emit(string eventName, EventArgs data)
+        public override async Task Emit(string eventName, EventArgs data)
         {
             if (this._webSocketInstance.State != WebSocketState.Open)
-                return Task.CompletedTask;
+                return;
 
             var requestArgs = new WebSocketArgs()
             {
@@ -69,31 +69,29 @@ namespace IndiGames.Network
 
             string message = JsonConvert.SerializeObject(requestArgs);
             Debug.Log("Emitting (" + message + ")");
-            return this._webSocketInstance.SendText(message);
+            await this._webSocketInstance.SendText(message);
         }
 
-        public override Task Emit(string simpleString)
+        public override async Task Emit(string simpleString)
         {
-            if (this._webSocketInstance.State != WebSocketState.Open)
-                return Task.CompletedTask;
-            return this._webSocketInstance.SendText(simpleString);
+            if (this._webSocketInstance.State == WebSocketState.Open)
+                await this._webSocketInstance.SendText(simpleString);
         }
 
-        public override Task Emit(byte[] bytes)
+        public override async Task Emit(byte[] bytes)
         {
-            if (this._webSocketInstance.State != WebSocketState.Open)
-                return Task.CompletedTask;
-            return this._webSocketInstance.Send(bytes);
+            if (this._webSocketInstance.State == WebSocketState.Open)
+                await this._webSocketInstance.Send(bytes);
         }
 
-        public override Task Connect()
+        public override async Task Connect()
         {
-            return this._webSocketInstance.Connect();
+            await this._webSocketInstance.Connect();
         }
 
-        public override Task Close()
+        public override async Task Close()
         {
-            return this._webSocketInstance.Close();
+            await this._webSocketInstance.Close();
         }
 
         protected override void OnMessage(byte[] data)
