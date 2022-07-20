@@ -28,16 +28,11 @@ namespace IndiGames.Network
     {
         public static string OnOpen { get { return "OnOpen"; } }
         public static string OnClose { get { return "OnClose"; } }
-        public static string OnEror { get { return "OnError"; } }
+        public static string OnError { get { return "OnError"; } }
     }
     public class WebSocketProtocol : NetworkProtocol
     {
         private WebSocket _webSocketInstance;
-        protected WebSocket WebSocketInstance
-        {
-            get;
-        }
-
         public WebSocketProtocol(string url, Dictionary<string, string> headers = null)
         {
             this._webSocketInstance = new WebSocket(url, headers);
@@ -98,15 +93,21 @@ namespace IndiGames.Network
         {
             string stringtifyData = Encoding.UTF8.GetString(data);
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
-            var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
-
-            if (this._listenerMap.TryGetValue(deserializeData.EventName, out EventHandler<string> eventListener))
+            try
             {
-                if (eventListener == null)
+                var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
+
+                if (this._listenerMap.TryGetValue(deserializeData.EventName, out EventHandler<string> eventListener))
                 {
-                    this._listenerMap.Add(deserializeData.EventName, null);
+                    if (eventListener == null)
+                    {
+                        this._listenerMap.Add(deserializeData.EventName, null);
+                    }
+                    eventListener?.Invoke(this, stringtifyData);
                 }
-                eventListener?.Invoke(this, stringtifyData);
+            } catch (Exception ex)
+            {
+                Debug.LogWarning(ex.GetType().Name + ": " + ex.Message);
             }
         }
 
@@ -135,7 +136,7 @@ namespace IndiGames.Network
 
             var args = new WebSocketArgs()
             {
-                EventName = WebSocketEvent.OnEror,
+                EventName = WebSocketEvent.OnError,
                 Data = eventErrorArgs
             };
 

@@ -25,6 +25,7 @@ namespace IndiGames.Network.Vitalify
         public override void OnMessage(byte[] data)
         {
             string stringtifyData = Encoding.UTF8.GetString(data);
+            Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
             try
             {
                 var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData);
@@ -38,9 +39,9 @@ namespace IndiGames.Network.Vitalify
                     eventListener?.Invoke(this, stringtifyData);
                 }
             }
-            catch (ArgumentNullException e)
+            catch (Exception ex)
             {
-                Debug.Log(e.ToString());
+                Debug.LogWarning("[Fallback to base WebSocketProtocol] " + ex.GetType().Name + ": " + ex.Message);
                 base.OnMessage(data);
             }
         }
