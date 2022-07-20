@@ -22,7 +22,7 @@ namespace IndiGames.Network.Vitalify
         {
         }
 
-        protected override void OnMessage(byte[] data)
+        public override void OnMessage(byte[] data)
         {
             string stringtifyData = Encoding.UTF8.GetString(data);
             try

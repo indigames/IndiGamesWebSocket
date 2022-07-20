@@ -58,7 +58,7 @@ namespace IndiGames.Network
             }
         }
 
-        protected virtual void OnMessage(byte[] data)
+        public virtual void OnMessage(byte[] data)
         {
             throw new NotImplementedException();
         }

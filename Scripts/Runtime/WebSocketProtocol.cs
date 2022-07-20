@@ -94,7 +94,7 @@ namespace IndiGames.Network
             await this._webSocketInstance.Close();
         }
 
-        protected override void OnMessage(byte[] data)
+        public override void OnMessage(byte[] data)
         {
             string stringtifyData = Encoding.UTF8.GetString(data);
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);

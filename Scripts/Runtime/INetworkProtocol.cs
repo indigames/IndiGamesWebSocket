@@ -13,5 +13,6 @@ namespace IndiGames.Network
         public Task Connect();
         public Task Close();
         public void DispatchMessageQueue();
+        public void OnMessage(Byte[] bytes);
     }
 }
