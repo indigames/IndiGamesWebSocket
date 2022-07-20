@@ -1,66 +1,40 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace IndiGames.Network
 {
 
-    public class NetworkProtocol : INetworkProtocol
+    public abstract class NetworkProtocol : INetworkProtocol
     {
-        public Dictionary<string, EventHandler<string>> _listenerMap = new Dictionary<string, EventHandler<string>>();
+        protected Dictionary<string, EventHandler<EventArgs>> _listenerMap = new Dictionary<string, EventHandler<EventArgs>>();
+        public abstract Task Close();
+        public abstract Task Connect();
+        public abstract void DispatchMessageQueue();
+        public abstract Task Emit<T>(string eventName, T data) where T : EventArgs;
+        public abstract Task Emit(string jsonString);
+        public abstract Task Emit(byte[] bytes);
+        public abstract Task Emit(EventArgs data);
 
-        public virtual Task Close()
+        public void RegisterEvent<T>(string eventName, EventHandler<T> listener) where T : EventArgs
         {
-            throw new NotImplementedException();
-        }
-
-        public virtual Task Connect()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual void DispatchMessageQueue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Task Emit(string eventName, EventArgs data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Task Emit(string jsonString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Task Emit(byte[] bytes)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterEvent(string eventName, EventHandler<string> listener)
-        {
-            if (!this._listenerMap.TryGetValue(eventName, out EventHandler<string> eventListener))
+            if (!this._listenerMap.TryGetValue(eventName, out EventHandler<EventArgs> eventListener))
             {
                 this._listenerMap.Add(eventName, eventListener);
             }
             this._listenerMap[eventName] += listener;
         }
 
-
-        public void UnregisterEventListener(string eventName, EventHandler<string> listener)
+        public void UnregisterEventListener<T>(string eventName, EventHandler<T> listener) where T : EventArgs
         {
-            if (this._listenerMap.TryGetValue(eventName, out EventHandler<string> eventListener))
+            if (this._listenerMap.TryGetValue(eventName, out EventHandler<EventArgs> eventListener))
             {
                 eventListener -= listener;
                 this._listenerMap[eventName] = eventListener;
             }
         }
 
-        protected virtual void OnMessage(byte[] data)
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract void OnMessage(byte[] data);
     }
 }

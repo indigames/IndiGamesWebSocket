@@ -2,18 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace IndiGames.Network.Vitalify
 {
-    public class VitalifyBaseArgs : EventArgs
+    public class VitalifyBaseArgs : WebSocketArgs
     {
         [JsonProperty("codeKey")]
         public string CodeKey;
 
         [JsonProperty("data")]
-        public EventArgs Data;
+        public new EventArgs Data;
     }
 
     public class VitalifyWSProtocol : WebSocketProtocol
@@ -30,13 +31,13 @@ namespace IndiGames.Network.Vitalify
             {
                 var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData);
 
-                if (this._listenerMap.TryGetValue(deserializeData.CodeKey, out EventHandler<string> eventListener))
+                if (this._listenerMap.TryGetValue(deserializeData.CodeKey, out EventHandler<EventArgs> eventListener))
                 {
                     if (eventListener == null)
                     {
                         this._listenerMap.Add(deserializeData.CodeKey, null);
                     }
-                    eventListener?.Invoke(this, stringtifyData);
+                    eventListener?.Invoke(this, deserializeData);
                 }
             }
             catch (Exception ex)

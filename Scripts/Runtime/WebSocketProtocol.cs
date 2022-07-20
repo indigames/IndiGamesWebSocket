@@ -8,12 +8,12 @@ using UnityEngine;
 
 namespace IndiGames.Network
 {
-    public class WebSocketCloseEventArgs : EventArgs
+    public class WebSocketCloseEventArgs : WebSocketArgs
     {
         public WebSocketCloseCode CloseCode;
     }
 
-    public class WebSocketErrorEventArgs : EventArgs
+    public class WebSocketErrorEventArgs : WebSocketArgs
     {
         public string ErrorMessage;
     }
@@ -50,7 +50,7 @@ namespace IndiGames.Network
 #endif
         }
 
-        public override async Task Emit(string eventName, EventArgs data)
+        public override async Task Emit<U>(string eventName, U data)
         {
             if (this._webSocketInstance.State != WebSocketState.Open)
                 return;
@@ -65,6 +65,12 @@ namespace IndiGames.Network
             string message = JsonConvert.SerializeObject(requestArgs);
             Debug.Log("Emitting (" + message + ")");
             await this._webSocketInstance.SendText(message);
+        }
+
+        public override async Task Emit(EventArgs data)
+        {
+            if (this._webSocketInstance.State == WebSocketState.Open)
+                await this._webSocketInstance.SendText(JsonConvert.SerializeObject(data));
         }
 
         public override async Task Emit(string simpleString)
@@ -97,13 +103,13 @@ namespace IndiGames.Network
             {
                 var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
 
-                if (this._listenerMap.TryGetValue(deserializeData.EventName, out EventHandler<string> eventListener))
+                if (this._listenerMap.TryGetValue(deserializeData.EventName, out EventHandler<EventArgs> eventListener))
                 {
                     if (eventListener == null)
                     {
                         this._listenerMap.Add(deserializeData.EventName, null);
                     }
-                    eventListener?.Invoke(this, stringtifyData);
+                    eventListener?.Invoke(this, deserializeData);
                 }
             } catch (Exception ex)
             {
