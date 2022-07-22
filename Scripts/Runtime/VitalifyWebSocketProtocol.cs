@@ -7,14 +7,19 @@ using UnityEngine;
 
 namespace IndiGames.Network.Vitalify
 {
-    public class VitalifyBaseArgs : EventArgs
-    {
-        [JsonProperty("codeKey")]
-        public string CodeKey;
+    // public abstract class VitalifyBaseArgs : NetworkArgs
+    // {
+    //     [JsonProperty("codeKey")]
+    //     public string CodeKey;
+    //     [JsonProperty("message")]
+    //     public string Message = "sendmessage";
+    // }
 
-        [JsonProperty("data")]
-        public EventArgs Data;
-    }
+    // public class VitalifyRequestArgs : VitalifyBaseArgs
+    // {
+    //     [JsonProperty("requestId")]
+    //     public string RequestId = Guid.NewGuid().ToString();
+    // }
 
     public class VitalifyWSProtocol : WebSocketProtocol
     {
@@ -28,16 +33,16 @@ namespace IndiGames.Network.Vitalify
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
             try
             {
-                var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData);
+                // var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData);
 
-                if (this._listenerMap.TryGetValue(deserializeData.CodeKey, out EventHandler<string> eventListener))
-                {
-                    if (eventListener == null)
-                    {
-                        this._listenerMap.Add(deserializeData.CodeKey, null);
-                    }
-                    eventListener?.Invoke(this, stringtifyData);
-                }
+                // if (this._listenerMap.TryGetValue(deserializeData.CodeKey, out EventHandler<string> eventListener))
+                // {
+                //     if (eventListener == null)
+                //     {
+                //         this._listenerMap.Add(deserializeData.CodeKey, null);
+                //     }
+                //     eventListener?.Invoke(this, stringtifyData);
+                // }
             }
             catch (Exception ex)
             {
