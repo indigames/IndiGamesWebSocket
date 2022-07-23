@@ -11,15 +11,30 @@ namespace IndiGames.Network
 {
     public class WebSocketProtocol : NetworkProtocol
     {
-        public class WebSocketArgs : ITinyMessage
+        public class WebSocketArgs : NetworkMessage
         {
-            [JsonProperty("data")]
-            public EventArgs Data;
+            public override string EventName { get; set; } = "DefaultEvent";
+        }
 
-            public object Sender => throw new NotImplementedException();
+        public class WebSocketOpenArgs : WebSocketArgs
+        {
+            public override string EventName => "OnOpen";
+        }
+
+        public class WebSocketErrorArgs : WebSocketArgs
+        {
+            public override string EventName => "OnError";
+            [JsonProperty("message")] public string Message;
+        }
+
+        public class WebSocketCloseArgs : WebSocketArgs
+        {
+            [JsonProperty("eventName")] public override string EventName => "OnClose";
+            [JsonProperty("code")] public WebSocketCloseCode Code;
         }
 
         private WebSocket _webSocketInstance;
+
         public WebSocketProtocol(string url, Dictionary<string, string> headers = null)
         {
             this._webSocketInstance = new WebSocket(url, headers);
@@ -39,10 +54,8 @@ namespace IndiGames.Network
 
         public override async Task Emit<T>(T data)
         {
-            if (this._webSocketInstance.State != WebSocketState.Open)
-                return;
-
-            await this._webSocketInstance.SendText(JsonConvert.SerializeObject(data));
+            if (this._webSocketInstance.State == WebSocketState.Open)
+                await this._webSocketInstance.SendText(JsonConvert.SerializeObject(data));
         }
 
         public override async Task Emit(string simpleString)
@@ -73,14 +86,13 @@ namespace IndiGames.Network
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
             try
             {
-                // var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
+                var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
+                var eventName = deserializeData.EventName;
 
-                // string eventName = deserializeData.EventName;
-                // if (!this._handlerEventDictionary.ContainsKey(eventName))
-                //     return;
-
-                // var actionDel = this._handlerEventDictionary[eventName];
-                // (actionDel as Action<T>)?.Invoke(JsonConvert.DeserializeObject<T>(stringtifyData));
+                if (this.HandlerEventDictionary.TryGetValue(eventName, out Type typeToCast))
+                {
+                    this.MessageHub.Publish(Activator.CreateInstance(typeToCast) as NetworkMessage);
+                }
             }
             catch (Exception ex)
             {
@@ -88,26 +100,35 @@ namespace IndiGames.Network
             }
         }
 
+        public void EmitDebug(NetworkMessage message)
+        {
+#if UNITY_EDITOR
+            this.OnMessage((Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message))));
+#endif
+        }
+
         private void OnClose(WebSocketCloseCode closeCode)
         {
-            // var args = new WebSocketCloseArgs();
-            // args.Data.Code = closeCode;
-
-            // this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
+            var args = new WebSocketCloseArgs()
+            {
+                Code = closeCode
+            };
+            this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
         }
 
         private void OnError(string errorMsg)
         {
-            // var args = new WebSocketErrorArgs();
-            // args.Data.ErrorMessage = errorMsg;
-
-            // this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
+            var args = new WebSocketErrorArgs()
+            {
+                Message = errorMsg
+            };
+            this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
         }
 
         private void OnOpen()
         {
-            // var args = new WebSocketOpenArgs();
-            // this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
+            var args = new WebSocketOpenArgs();
+            this.OnMessage(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(args)));
         }
     }
 }
