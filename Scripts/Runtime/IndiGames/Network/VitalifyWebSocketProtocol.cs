@@ -35,8 +35,8 @@ namespace IndiGames.Network
 
                 if (this.HandlerEventDictionary.TryGetValue(eventName, out Type typeToCast))
                 {
-                    // this.MessageHub.Publish(Activator.CreateInstance(typeToCast) as NetworkMessage);
-                    this.MessageHub.Publish(JsonConvert.DeserializeObject(stringtifyData, typeToCast) as NetworkMessage);
+                    var publishClientData = JsonConvert.DeserializeObject(stringtifyData, typeToCast) as NetworkMessage;
+                    this.MessageHub.Publish(publishClientData);
                 }
             }
             catch (Exception ex)
