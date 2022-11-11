@@ -20,6 +20,9 @@ namespace IndiGames.Network
 
     public class VitalifyWsProtocol : WebSocketProtocol
     {
+
+        public bool looseJSONParsing = false;
+
         public VitalifyWsProtocol(string url, Dictionary<string, string> headers = null) : base(url, headers)
         {
         }
@@ -30,7 +33,15 @@ namespace IndiGames.Network
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
             try
             {
-                var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData);
+                var settings = new JsonSerializerSettings();
+
+                if (looseJSONParsing)
+                {
+                    settings.NullValueHandling = NullValueHandling.Ignore;
+                    settings.MissingMemberHandling = MissingMemberHandling.Ignore;
+                };
+
+                var deserializeData = JsonConvert.DeserializeObject<VitalifyBaseArgs>(stringtifyData, settings);
                 var eventName = deserializeData.CodeKey;
 
                 if (this.HandlerEventDictionary.TryGetValue(eventName, out Type typeToCast))
