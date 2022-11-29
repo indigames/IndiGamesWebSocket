@@ -84,19 +84,18 @@ namespace IndiGames.Network
         {
             string stringtifyData = Encoding.UTF8.GetString(data);
             Debug.Log("Received OnMessage! (" + data.Length + " bytes) " + stringtifyData);
-            try
-            {
-                var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
-                var eventName = deserializeData.EventName;
+            var deserializeData = JsonConvert.DeserializeObject<WebSocketArgs>(stringtifyData);
+            var eventName = deserializeData.EventName;
 
-                if (this.HandlerEventDictionary.TryGetValue(eventName, out Type typeToCast))
-                {
-                    this.MessageHub.Publish(Activator.CreateInstance(typeToCast) as NetworkMessage);
-                }
-            }
-            catch (Exception ex)
+            if (eventName == null)
             {
-                Debug.LogWarning(ex.GetType().Name + ": " + ex.Message);
+                Debug.LogWarning($"Websocket cannot handle event of null\n{stringtifyData}");
+                return;
+            }
+
+            if (this.HandlerEventDictionary.TryGetValue(eventName, out Type typeToCast))
+            {
+                this.MessageHub.Publish(Activator.CreateInstance(typeToCast) as NetworkMessage);
             }
         }
 
